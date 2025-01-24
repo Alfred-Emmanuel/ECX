@@ -1,7 +1,9 @@
 import jwt from "jsonwebtoken";
+import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 import { registerSchema, loginSchema } from "../middleware/validate.middleware";
 import { Request, Response, NextFunction } from "express";
+import { ValidationError } from "../middleware/error.middleware";
 const User = require("../models/user.model");
 
 interface AuthRequest extends Request {
@@ -33,8 +35,7 @@ export const registerUser = async (
     const userExists = await User.findOne({ email });
 
     if (userExists) {
-      res.status(400);
-      throw new Error("Email already exists, please login");
+      throw new ValidationError("Email alreay Exists");
     }
 
     const salt = await bcrypt.genSalt(10);
@@ -89,10 +90,7 @@ export const login = async (
       //   name: user.name,
     });
   } else {
-    res.status(400).json({
-      message: "Invalid credentials",
-    });
-    return;
+    throw new ValidationError("Invalid Credentials");
   }
 };
 
@@ -113,9 +111,12 @@ export const getMe = async (
 export const getUser = async (req: Request, res: Response) => {
   const userId = req.params.userId;
 
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+    throw new ValidationError("Invalid ID Format");
+  }
+
   if (!userId) {
-    res.status(400).json({ message: "Invalid User" });
-    return;
+    throw new ValidationError("Invalid User");
   }
 
   const user = await User.findById(userId).select("-password");
