@@ -1,14 +1,14 @@
 name: CI/CD Pipeline
 
-on: 
-  push: 
-    branches: 
+on:
+  push:
+    branches:
       - main
-  pull_request: 
+  pull_request:
     branches:
       - main
 
-jobs: 
+jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
@@ -17,8 +17,13 @@ jobs:
         image: mongo:5.0
         ports:
           - 27017:27017
+        options: >-
+          --health-cmd="mongosh -- eval 'db.runCommand({ping: 2})'"
+          --health-intervals=10s
+          --health-timeout=5s
+          --health-retries=3
 
-    steps: 
+    steps:
       # Checkout the code
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -26,7 +31,7 @@ jobs:
       # Set up a Node.js environment
       - name: Setup Node.js
         uses: actions/setup-node@v4
-        with: 
+        with:
           node-version: 20
 
       # Install dependencies
@@ -35,7 +40,10 @@ jobs:
 
       # Run tests
       - name: Run tests
-        run: npm test
+        env:
+          MONGO_URI: mongodb://localhost:27017/test
+        run: |
+          NODE_ENV=test npm test
 
     #   # deploy to render
     #   - name: Deploy to render
