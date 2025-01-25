@@ -41,9 +41,10 @@ jobs:
       # Run tests
       - name: Run tests
         env:
+          NODE_ENV: test
           MONGO_URI: mongodb://localhost:27017/test
         run: |
-          NODE_ENV=test npm test
+          npm test
 
     #   # deploy to render
     #   - name: Deploy to render
