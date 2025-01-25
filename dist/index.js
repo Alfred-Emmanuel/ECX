@@ -15,8 +15,7 @@ app.use(express_1.default.json());
 app.use(requestLogger_middleware_1.requestLogger);
 app.use("/", user_routes_1.default);
 app.use(errorHandler_1.errorHandler);
-// if (process.env.NODE_ENV !== "test") {
-//   app.listen(port, () => console.log(`Server started on ${port}`));
-// }
-app.listen(port, () => console.log(`Server started on ${port}`));
+if (process.env.NODE_ENV !== "test") {
+    app.listen(port, () => console.log(`Server started on ${port}`));
+}
 exports.default = app;
